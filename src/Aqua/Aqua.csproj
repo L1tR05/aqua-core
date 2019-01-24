@@ -8,7 +8,7 @@
     <PackageTags>type-info;dynamic-object;expando-object;object-mapping;object-mapper</PackageTags>
     <PackageIconUrl>https://raw.githubusercontent.com/6bee/aqua-core/master/aqua-small.png</PackageIconUrl>
     <PackageProjectUrl>https://github.com/6bee/aqua-core</PackageProjectUrl>
-    <PackageLicenseUrl>https://raw.githubusercontent.com/6bee/aqua-core/master/license.txt</PackageLicenseUrl>
+    <PackageLicense>https://raw.githubusercontent.com/6bee/aqua-core/master/license.txt</PackageLicense>
     <RepositoryType>git</RepositoryType>
     <RepositoryUrl>https://github.com/6bee/aqua-core.git</RepositoryUrl>
     <GenerateAssemblyTitleAttribute>true</GenerateAssemblyTitleAttribute>
@@ -22,12 +22,16 @@
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
   </PropertyGroup>
 
+  <ItemGroup>
+    <Compile Include="..\..\GlobalAssemblyInfo.cs" Link="Properties\GlobalAssemblyInfo.cs" />
+  </ItemGroup>
+
   <ItemGroup Condition=" '$(TargetFramework)' == 'netstandard1.3' ">
     <PackageReference Include="System.Linq.Queryable" Version="4.3.0" />
     <PackageReference Include="System.Reflection.Emit" Version="4.3.0" />
     <PackageReference Include="System.Runtime.Serialization.Formatters" Version="4.3.0" />
     <PackageReference Include="System.Xml.XmlSerializer" Version="4.3.0" />
-    <PackageReference Include="Microsoft.Extensions.DependencyModel" Version="1.1.0" />
+    <PackageReference Include="Microsoft.Extensions.DependencyModel" Version="2.1.0" />
   </ItemGroup>
 
   <ItemGroup Condition=" '$(TargetFramework)' == 'netstandard1.6' ">
@@ -36,7 +40,7 @@
     <PackageReference Include="System.Xml.XmlSerializer" Version="4.3.0" />
     <PackageReference Include="System.Runtime.Loader" Version="4.3.0" />
     <PackageReference Include="System.Runtime.Serialization.Formatters" Version="4.3.0" />
-    <PackageReference Include="Microsoft.Extensions.DependencyModel" Version="1.1.0" />
+    <PackageReference Include="Microsoft.Extensions.DependencyModel" Version="2.1.0" />
   </ItemGroup>
 
   <ItemGroup Condition=" '$(TargetFramework)' == 'netstandard2.0' ">

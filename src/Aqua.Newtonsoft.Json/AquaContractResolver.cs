@@ -19,7 +19,7 @@ namespace Aqua
 
         public override JsonContract ResolveContract(Type type)
         {
-            if (ReferenceEquals(null, _decorated) || typeof(DynamicObject).IsAssignableFrom(type))
+            if (_decorated is null || typeof(DynamicObject).IsAssignableFrom(type))
             {
                 return base.ResolveContract(type);
             }
@@ -43,7 +43,7 @@ namespace Aqua
 
             if (typeof(DynamicObject).IsAssignableFrom(objectType))
             {
-                contract.OnDeserializedCallbacks.Add(PrimitiveValueInspector.DynamicObjectSerializationCallback);
+                contract.OnDeserializedCallbacks.Add(NativeValueInspector.DynamicObjectSerializationCallback);
                 contract.IsReference = true;
                 foreach (var property in contract.Properties.Where(x => !x.Writable || !x.Readable))
                 {

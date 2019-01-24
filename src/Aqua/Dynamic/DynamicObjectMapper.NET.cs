@@ -16,7 +16,7 @@ namespace Aqua.Dynamic
         private const string BackingFieldRegexPattern = @"^(.+\+)?\<(?<name>.+)\>k__BackingField$";
 
         /// <summary>
-        /// Gets an uninitialized instance of the specified type by using <see cref="FormatterServices" />
+        /// Gets an uninitialized instance of the specified type by using <see cref="FormatterServices" />.
         /// </summary>
         private static object GetUninitializedObject(Type type)
         {
@@ -24,7 +24,7 @@ namespace Aqua.Dynamic
         }
 
         /// <summary>
-        /// Populate object members type by using <see cref="FormatterServices" />
+        /// Populate object members type by using <see cref="FormatterServices" />.
         /// </summary>
         private void PopulateObjectMembers(Type type, DynamicObject from, object to)
         {
@@ -39,7 +39,7 @@ namespace Aqua.Dynamic
 
             foreach (var dynamicProperty in from.Properties)
             {
-                if (!ReferenceEquals(null, customPropertyNames) && !customPropertyNames.ContainsKey(dynamicProperty.Name))
+                if (!(customPropertyNames is null) && !customPropertyNames.ContainsKey(dynamicProperty.Name))
                 {
                     continue;
                 }
@@ -77,7 +77,7 @@ namespace Aqua.Dynamic
         }
 
         /// <summary>
-        /// Retrieves object members type by using <see cref="FormatterServices" /> and populates dynamic object
+        /// Retrieves object members type by using <see cref="FormatterServices" /> and populates dynamic object.
         /// </summary>
         private void MapObjectMembers(Type type, object from, DynamicObject to, Func<Type, bool> setTypeInformation)
         {
@@ -91,7 +91,7 @@ namespace Aqua.Dynamic
             for (int i = 0; i < members.Length; i++)
             {
                 var memberName = GetCleanMemberName(members[i]);
-                if (!ReferenceEquals(null, customPropertyNames) && !customPropertyNames.ContainsKey(memberName))
+                if (!(customPropertyNames is null) && !customPropertyNames.ContainsKey(memberName))
                 {
                     continue;
                 }
@@ -114,7 +114,7 @@ namespace Aqua.Dynamic
             if (member.MemberType != MemberTypes.Property)
             {
                 var property = member.DeclaringType.GetProperty(memberName, BindingFlags.Public | BindingFlags.Instance | BindingFlags.IgnoreCase);
-                if (!ReferenceEquals(null, property))
+                if (!(property is null))
                 {
                     memberName = property.Name;
                 }

@@ -2,11 +2,8 @@
 
 namespace Aqua.TypeSystem
 {
-    using Extensions;
     using System;
     using System.Diagnostics;
-    using System.Linq;
-    using System.Reflection;
     using System.Runtime.Serialization;
     using BindingFlags = System.Reflection.BindingFlags;
 
@@ -23,36 +20,31 @@ namespace Aqua.TypeSystem
         }
 
         public ConstructorInfo(System.Reflection.ConstructorInfo constructorInfo)
-            : base(constructorInfo, TypeInfo.CreateReferenceTracker<Type>())
+            : this(constructorInfo, new TypeInfoProvider())
+        {
+        }
+
+        internal ConstructorInfo(System.Reflection.ConstructorInfo constructorInfo, TypeInfoProvider typeInfoProvider)
+            : base(constructorInfo, typeInfoProvider)
         {
             _constructor = constructorInfo;
         }
 
         // TODO: replace binding flags by bool flags
         public ConstructorInfo(string name, Type declaringType, BindingFlags bindingFlags, Type[] genericArguments, Type[] parameterTypes)
-            : base(name, declaringType, bindingFlags, genericArguments, parameterTypes, TypeInfo.CreateReferenceTracker<Type>())
+            : base(name, declaringType, bindingFlags, genericArguments, parameterTypes, new TypeInfoProvider())
         {
         }
 
         protected ConstructorInfo(ConstructorInfo constructorInfo)
-            : base(constructorInfo, TypeInfo.CreateReferenceTracker<TypeInfo>())
+            : base(constructorInfo, new TypeInfoProvider())
         {
         }
 
         public override MemberTypes MemberType => MemberTypes.Constructor;
 
         internal System.Reflection.ConstructorInfo Constructor
-        {
-            get
-            {
-                if (ReferenceEquals(null, _constructor))
-                {
-                    _constructor = this.ResolveConstructor(TypeResolver.Instance);
-                }
-
-                return _constructor;
-            }
-        }
+            => _constructor ?? (_constructor = this.ResolveConstructor(TypeResolver.Instance));
 
         public static explicit operator System.Reflection.ConstructorInfo(ConstructorInfo c)
             => c.Constructor;

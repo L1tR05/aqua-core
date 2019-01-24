@@ -2,7 +2,6 @@
 
 namespace Aqua.TypeSystem
 {
-    using Aqua.Extensions;
     using System;
     using System.Linq;
     using System.Reflection;
@@ -66,12 +65,12 @@ namespace Aqua.TypeSystem
                 }
             }
 
-            if (ReferenceEquals(null, type))
+            if (type is null)
             {
                 type = _typeEmitter(typeInfo);
             }
 
-            if (ReferenceEquals(null, type))
+            if (type is null)
             {
                 throw new Exception($"Type '{typeInfo.FullName}' could not be resolved");
             }
@@ -81,7 +80,7 @@ namespace Aqua.TypeSystem
 
         private Type ResolveOpenGenericType(TypeInfo typeInfo, Type type)
         {
-            if (ReferenceEquals(null, type))
+            if (type is null)
             {
                 return null;
             }
@@ -105,7 +104,7 @@ namespace Aqua.TypeSystem
 
         private bool IsValid(TypeInfo typeInfo, Type resolvedType)
         {
-            if (!ReferenceEquals(null, resolvedType))
+            if (!(resolvedType is null))
             {
                 // can only validate properties if set in typeinfo
                 if (typeInfo.Properties?.Any() ?? false)
