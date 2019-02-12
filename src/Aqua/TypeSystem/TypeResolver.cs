@@ -55,6 +55,7 @@ namespace Aqua.TypeSystem
                 var assemblies = GetAssemblies();
                 foreach (var assembly in assemblies)
                 {
+                    var assemblyName = assembly.FullName;
                     type = assembly.GetType(typeInfo.FullName);
                     if (IsValid(typeInfo, type))
                     {

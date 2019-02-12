@@ -4,12 +4,15 @@ namespace Aqua.Dynamic
 {
     using Aqua.TypeSystem;
     using Aqua.TypeSystem.Extensions;
+    using Newtonsoft.Json.Linq;
     using System;
     using System.Collections.Generic;
     using System.Diagnostics;
+    using System.Dynamic;
     using System.Globalization;
     using System.Linq;
     using System.Reflection;
+    using Workbeat.Newtonsoft.Json;
     using ConstructorInfo = System.Reflection.ConstructorInfo;
     using FieldInfo = System.Reflection.FieldInfo;
     using MethodInfo = System.Reflection.MethodInfo;
@@ -474,6 +477,47 @@ namespace Aqua.Dynamic
             {
                 return items.ToArray();
             }
+            else if (type != null && type.Name.Contains("AnonymousType"))
+            {
+                var x = type.GetConstructors()[0];
+                var types = new Type[x.GetParameters().Count()];
+
+                for (int i = 0; i < types.Length; i++)
+                {
+                    types[i] = x.GetParameters()[i].ParameterType;
+                }
+
+                // dictionaries don't have an order, so we force an order based
+                // on the Key
+                // var ordered = dict.OrderBy(x => x.Key).ToArray();
+
+                // string[] names = Array.ConvertAll(ordered, x => x.Key);
+
+                // Type type = AnonymousType.CreateType(types, names);
+
+                object[] vals = items.ToArray();
+
+                object[] values = Array.ConvertAll((vals[0] as IDictionary<string, object>).ToArray(), y =>
+                {
+                    var ti = (vals[0] as IDictionary<string, object>).ToList().IndexOf(y);
+                    if (y.Value.GetType().IsValueType || y.Value.GetType() == typeof(string))
+                    {
+                        return Convert.ChangeType(y.Value, types[ti]);
+                    }
+                    else
+                    {
+                        return JObjectValueInspector.JObjectToObject(y.Value as JObject, new Newtonsoft.Json.JsonSerializerSettings()
+                        {
+                            TypeNameHandling = Newtonsoft.Json.TypeNameHandling.All,
+                        });
+                    }
+                });
+
+                object obj = type.GetConstructor(types).Invoke(values);
+
+                var array = CastCollectionToArrayOfType(type, new[] { obj });
+                return (System.Collections.IEnumerable)array;
+            }
             else
             {
                 var array = CastCollectionToArrayOfType(type, items);
@@ -660,7 +704,15 @@ namespace Aqua.Dynamic
 
                 return MapInternal(dynamicObj, sourceType, targetType);
             }
-
+#if !NETSTANDARD1_X
+            if (obj is JObject)
+            {
+                var jss = new Newtonsoft.Json.JsonSerializerSettings();
+                jss.TypeNameHandling = Newtonsoft.Json.TypeNameHandling.All;
+                jss.PreserveReferencesHandling = Newtonsoft.Json.PreserveReferencesHandling.All;
+                obj = JObjectValueInspector.JObjectToObject(obj as JObject, jss);
+            }
+#endif
             var objectType = obj.GetType();
 
             if (objectType == targetType && !IsCollection(obj))
@@ -966,7 +1018,7 @@ namespace Aqua.Dynamic
             else
             {
                 var dynamicProperties = obj.Properties.ToList();
-                var constructor = targetType.GetConstructors()
+                var paramtrs = targetType.GetConstructors()
                     .Select(i =>
                     {
                         var paramterList = i.GetParameters();
@@ -985,7 +1037,8 @@ namespace Aqua.Dynamic
                                 })
                                 .ToArray(),
                         };
-                    })
+                    });
+                var constructor = paramtrs
                     .OrderByDescending(i => i.ParametersCount == 0 ? int.MaxValue : i.ParametersCount)
                     .FirstOrDefault(i => i.Parameters.All(p => !(p.Property is null)));
 
@@ -998,6 +1051,20 @@ namespace Aqua.Dynamic
                             .ToArray();
                         var instance = constructor.Info.Invoke(arguments);
                         return instance;
+                    };
+                    initializer = CreatePropertyInitializer();
+                }
+                else if (targetType.IsAnonymousType())
+                {
+                    factory = (t, item) =>
+                    {
+                        var instance = new ExpandoObject() as IDictionary<string, object>;
+                        foreach (var p in paramtrs.ToArray()[0].Parameters)
+                        {
+                            instance[p.Info.Name] = p.Info.DefaultValue;
+                        }
+
+                        return (ExpandoObject)instance;
                     };
                     initializer = CreatePropertyInitializer();
                 }
@@ -1051,6 +1118,16 @@ namespace Aqua.Dynamic
                         {
                             field.SetValue(obj, value);
                         }
+                    }
+                }
+
+                if (obj is ExpandoObject)
+                {
+                    foreach (var props in item.PropertyNames)
+                    {
+                        object el = null;
+                        item.TryGet(props, out el);
+                        ((IDictionary<string, object>)obj)[props] = el;
                     }
                 }
             };

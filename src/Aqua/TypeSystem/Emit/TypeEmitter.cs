@@ -43,7 +43,7 @@ namespace Aqua.TypeSystem.Emit
         {
             var fullName = CreateUniqueClassName();
 
-            var propertyInfos = typeInfo.Properties.ToArray();
+            var propertyInfos = typeInfo?.Properties?.ToArray() ?? new TypeSystem.PropertyInfo[] { };
 
             // define type
             var type = _module.DefineType(fullName, TypeAttributes.Public | TypeAttributes.AutoClass | TypeAttributes.AnsiClass | TypeAttributes.BeforeFieldInit | TypeAttributes.Sealed, typeof(object));
