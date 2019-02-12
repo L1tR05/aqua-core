@@ -60,7 +60,8 @@ namespace Workbeat.Newtonsoft.Json
 
                 if (p.PropertyType.IsValueType || p.PropertyType == typeof(string))
                 {
-                    p.SetValue(newObj, JTokenToPrimitive(value));
+                    var pt = Nullable.GetUnderlyingType(p.PropertyType);
+                    p.SetValue(newObj, Convert.ChangeType(JTokenToPrimitive(value), pt ?? p.PropertyType));
                 }
                 else if (p.PropertyType.IsArray && value is JArray)
                 {
