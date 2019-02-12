@@ -37,6 +37,7 @@ namespace Workbeat.Newtonsoft.Json
             var isGeneric = jObjType["isGenericType"]?.Value<bool?>() ?? false;
             if (isGeneric)
             {
+                var id = (int)jObjType["$id"];
                 Type[] types = jObjType["genericArguments"].Select(t =>
                 {
                     var s1 = $"{t["namespace"]}.{t["name"]}";
@@ -46,10 +47,18 @@ namespace Workbeat.Newtonsoft.Json
 #else
                     var t1 = Type.GetType(s1);
 #endif
-                    typesDict.Add(id1, t1);
+                    if (!typesDict.ContainsKey(id1))
+                    {
+                        typesDict.Add(id1, t1);
+                    }
+
                     return t1;
                 }).ToArray();
                 type = type.MakeGenericType(types);
+                if (!typesDict.ContainsKey(id))
+                {
+                    typesDict.Add(id, type);
+                }
             }
 
             object newObj = Activator.CreateInstance(type);

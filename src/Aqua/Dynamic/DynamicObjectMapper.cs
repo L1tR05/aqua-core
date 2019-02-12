@@ -164,6 +164,8 @@ namespace Aqua.Dynamic
 
         private const string NumericPattern = @"([0-9]*\.?[0-9]+|[0-9]+\.?[0-9]*)([eE][+-]?[0-9]+)?";
 
+        private Dictionary<int, Type> typesDictionary;
+
         private static readonly string ComplexNumberParserRegexPattern = $"^(?<Re>[+-]?({NumericPattern}))(?<Sign>[+-])[iI](?<Im>{NumericPattern})$";
 
         private static readonly Type _genericDictionaryType = typeof(Dictionary<,>);
@@ -411,6 +413,16 @@ namespace Aqua.Dynamic
         private readonly bool _formatNativeTypesAsString;
 #if !NETSTANDARD1_X
         private readonly bool _utilizeFormatterServices;
+
+        public Dictionary<int, Type> TypesDictionary
+        {
+            get
+            {
+                typesDictionary = typesDictionary ?? new Dictionary<int, Type>();
+                return typesDictionary;
+            }
+            set => typesDictionary = value;
+        }
 #endif
 
         /// <summary>
@@ -506,10 +518,7 @@ namespace Aqua.Dynamic
                     }
                     else
                     {
-                        return JObjectValueInspector.JObjectToObject(y.Value as JObject, new Newtonsoft.Json.JsonSerializerSettings()
-                        {
-                            TypeNameHandling = Newtonsoft.Json.TypeNameHandling.All,
-                        });
+                        return JObjectValueInspector.JObjectToObject(y.Value as JObject, new Newtonsoft.Json.JsonSerializerSettings() { TypeNameHandling = Newtonsoft.Json.TypeNameHandling.All }, TypesDictionary);
                     }
                 });
 
@@ -710,7 +719,7 @@ namespace Aqua.Dynamic
                 var jss = new Newtonsoft.Json.JsonSerializerSettings();
                 jss.TypeNameHandling = Newtonsoft.Json.TypeNameHandling.All;
                 jss.PreserveReferencesHandling = Newtonsoft.Json.PreserveReferencesHandling.All;
-                obj = JObjectValueInspector.JObjectToObject(obj as JObject, jss);
+                obj = JObjectValueInspector.JObjectToObject(obj as JObject, jss, TypesDictionary);
             }
 #endif
             var objectType = obj.GetType();
