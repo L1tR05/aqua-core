@@ -49,13 +49,41 @@ namespace Aqua.Tests.Dynamic.DynamicObject
         }
 
         [Fact]
-        public void Should_not_be_convertible_to_anonymous_type_with_additional_properties()
+        public void Should_be_convertible_to_dynamic_type_with_additional_properties()
         {
             var objType = new { Int32Value, DoubleValue, StringValue, DateTimeValue = DateTime.Now };
 
-            var ex = Assert.Throws<Exception>(() => dynamicObject.CreateObject(objType.GetType()));
+            object dynobj = dynamicObject.CreateObject(objType.GetType()) as System.Dynamic.ExpandoObject;
 
-            ex.Message.ShouldStartWith("Failed to pick matching constructor for type");
+            dynobj.ShouldNotBeNull();
+
+            dynobj.ShouldBeOfType(typeof(System.Dynamic.ExpandoObject));
+
+            dynamic dobj = dynobj;
+
+            object intValue = dobj.Int32Value;
+
+            intValue.ShouldBeOfType(typeof(int));
+
+            intValue.ShouldBe(objType.Int32Value);
+
+            object doubleValue = dobj.DoubleValue;
+
+            doubleValue.ShouldBeOfType(typeof(double));
+
+            doubleValue.ShouldBe(objType.DoubleValue);
+
+            object stringValue = dobj.StringValue;
+
+            stringValue.ShouldBeOfType(typeof(string));
+
+            stringValue.ShouldBe(objType.StringValue);
+
+            object dateTimeValue = dobj.DateTimeValue;
+
+            dateTimeValue.ShouldBeOfType(typeof(DBNull));
+
+            dateTimeValue.ShouldNotBe(objType.DateTimeValue);
         }
 
         [Fact]

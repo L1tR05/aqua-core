@@ -1108,7 +1108,14 @@ namespace Aqua.Dynamic
                             IsAssignable(property.PropertyType, value) ||
                             TryExplicitConversions(property.PropertyType, ref value))
                         {
-                            property.SetValue(obj, value);
+                            if (obj is ExpandoObject)
+                            {
+                                ((IDictionary<string, object>)obj)[property.Name] = Convert.ChangeType(value, property.PropertyType);
+                            }
+                            else
+                            {
+                                property.SetValue(obj, Convert.ChangeType(value, property.PropertyType));
+                            }
                         }
                     }
                 }
